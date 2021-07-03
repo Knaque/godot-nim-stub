@@ -1,4 +1,4 @@
-import cligen, strutils, os, std/macros, algorithm
+import cligen, strutils, os, std/macros, algorithm, terminal
 
 macro asArray(oa: static seq[string]): untyped =
   # macro provided by ElegantBeef to turn seqs into arrays at compile time
@@ -22,7 +22,8 @@ proc probableObjName(node: string): string =
     result.add x.capitalizeAscii
 
 proc newscript(name: string, node: string) =
-  # cli command
+  ## Creates a new script.
+
   let
     uppername = name.capitalizeAscii
     lowername = name.toLower
@@ -68,4 +69,30 @@ class_name = "$1"
   echo "Created new script '$1' of type '$2'." % [uppername, lowernode]
   quit 0
 
-dispatch(newscript)
+proc delscript(name: string) =
+  ## Deletes an existing script.
+
+  let
+    uppername = name.capitalizeAscii
+    lowername = name.toLower
+
+  if not fileExists("scripts/$1.gdns" % uppername):
+    echo "'$1' does not exist. (Nim-style case sensitivity?)" % uppername
+    quit -1
+
+  echo "Are you sure you want to delete the script '$1'? (y/N)" % uppername
+  case getch().toLowerAscii
+  of 'y':
+    removeFile("src/$1.nim" % lowername)
+    removeFile("scripts/$1.gdns" % uppername)
+
+    let contents = readFile("src/stub.nim")
+    var stub = open("src/stub.nim", fmWrite)
+    stub.write(contents.replace("import $1" % lowername, "").replace("\n\n", ""))
+    stub.close()
+
+    echo "Successfully deleted script '$1'." % uppername
+  else:
+    echo "Aborted."
+
+dispatchMulti([newscript], [delscript])

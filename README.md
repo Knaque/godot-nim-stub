@@ -5,7 +5,7 @@ This is a stub project used to make creating Godot projects with Nim a little bi
 This is a fork of [pragmagic/godot-nim-stub](https://github.com/pragmagic/godot-nim-stub) where I have made a few improvements.
 
 - The nakefile now properly creates the Godot API.
-- I've created a little utility called `gdu` to make things easier. At the moment, `gdu` is only used to automatically generate template scripts, but its functionality may expand in the future.
+- I've created a little utility called `gdu` to make things easier.
 
 ## Prerequisites:
 
@@ -16,11 +16,15 @@ This is a fork of [pragmagic/godot-nim-stub](https://github.com/pragmagic/godot-
 
 ## Usage:
 
-1. Run `gdu --name=<component_name> --node=<node_type>` to create new `.nim` and `.gdns` files for you. `import <component_name>` will also automatically be appended to `stub.nim` for you.
+1. Run `gdu newscript --name=<component_name> --node=<node_type>` to create new `.nim` and `.gdns` files for you. `import <component_name>` will also automatically be appended to `stub.nim`.
 
-2. Run `nake build` to compile all of your components.
+2. Write your Nim code in your editor of choice.
 
-3. Do everything else in Godot!
+3. Run `nake build` to compile all of your components.
+
+4. When you want to delete a script, run `gdu delscript --name=<component_name>` to remove the `.nim` and `.gdns` files associated with that name, as well as the `import <component_name>` from `stub.nim`.
+
+5. Do everything else in Godot!
 
 ## Notes:
 
