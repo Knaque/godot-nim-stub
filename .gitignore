@@ -5,3 +5,6 @@
 /logs
 nimcache
 .nimcache
+/pkgs
+*/pkgs
+*.exe

@@ -1,5 +1,7 @@
 Stub project to demonstrate usage of the [godot-nim](https://github.com/pragmagic/godot-nim) library.
 
+**This is a fork (knaque/godot-nim-stub) since the original stub had some issues.**
+
 Prerequisites:
 
 1. Install [nake](https://github.com/fowlmouth/nake): `nimble install nake -n`.

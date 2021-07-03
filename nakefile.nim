@@ -1,7 +1,7 @@
 # Copyright 2017 Xored Software, Inc.
 
 import nake
-import os, ospaths, times
+import os, ospaths, times, strformat, osproc
 import godotapigen
 
 proc genGodotApi() =
@@ -15,10 +15,13 @@ proc genGodotApi() =
 
   const targetDir = "src"/"godotapi"
   createDir(targetDir)
+
   const jsonFile = targetDir/"api.json"
-  if not fileExists(jsonFile) or
-     godotBin.getLastModificationTime() > jsonFile.getLastModificationTime():
-    direShell(godotBin, "--gdnative-generate-json-api", getCurrentDir()/jsonFile)
+
+  if not fileExists(jsonFile) or godotBin.getLastModificationTime() > jsonFile.getLastModificationTime():
+    # this works, original nakefile did not
+    discard execCmdEx(&"{godotBin} --gdnative-generate-json-api {jsonFile}")
+  
     if not fileExists(jsonFile):
       echo "Failed to generate api.json"
       quit(-1)
