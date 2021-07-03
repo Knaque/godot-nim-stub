@@ -19,9 +19,9 @@ proc genGodotApi() =
   const jsonFile = targetDir/"api.json"
 
   if not fileExists(jsonFile) or godotBin.getLastModificationTime() > jsonFile.getLastModificationTime():
-    # this works, original nakefile did not
+    # pragmagic's original nakefile was broken here - it works now.
     discard execCmdEx(&"{godotBin} --gdnative-generate-json-api {jsonFile}")
-  
+
     if not fileExists(jsonFile):
       echo "Failed to generate api.json"
       quit(-1)
@@ -54,3 +54,4 @@ task "clean", "Remove files produced by build":
   removeDir("_dlls")
   removeFile("nakefile")
   removeFile("nakefile.exe")
+
