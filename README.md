@@ -5,7 +5,7 @@ This is a stub project used to make creating Godot projects with Nim a little bi
 This is a fork of [pragmagic/godot-nim-stub](https://github.com/pragmagic/godot-nim-stub) where I have made a few improvements.
 
 - The nakefile now properly creates the Godot API.
-- I've created a little utility called `gdu` to make things easier for developers. At the moment, `gdu` is only used to automatically generate template scripts, but its functionality may expand in the future.
+- I've created a little utility called `gdu` to make things easier. At the moment, `gdu` is only used to automatically generate template scripts, but its functionality may expand in the future.
 
 ## Prerequisites:
 
