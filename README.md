@@ -7,6 +7,8 @@ This is a fork of [pragmagic/godot-nim-stub](https://github.com/pragmagic/godot-
 - The nakefile now properly creates the Godot API.
 - I've created a little utility called `gdu` to make things easier.
 
+Use `git clone --depth=1 https://github.com/knaque/godot-nim-stub.git <project_name>` to download this stub.
+
 ## Prerequisites:
 
 1. Ensure `~/.nimble/bin` is on your PATH. (`C:\Users\<your_name>\.nimble\bin` on Windows.)
