@@ -1,35 +1,80 @@
-import cligen, strutils, os, std/macros, algorithm, terminal
+import cligen, strutils, os, algorithm, terminal, osproc, godotapigen, times
 
-macro asArray(oa: static seq[string]): untyped =
-  # macro provided by ElegantBeef to turn seqs into arrays at compile time
-  result = nnkBracket.newNimNode()
-  for x in oa:
-    result.add newLit(x)
+proc genGodotApi() =
+  let godotBin = getEnv("GODOT_BIN")
+  if godotBin.len == 0:
+    echo "GODOT_BIN environment variable is not set"
+    quit -1
+  if not fileExists(godotBin):
+    echo "Invalid GODOT_BIN path: " & godotBin
+    quit -1
 
-proc getNodeNames(): seq[string] {.compileTime.} =
+  const targetDir = "src"/"godotapi"
+  createDir(targetDir)
+
+  const jsonFile = targetDir/"api.json"
+
+  if not fileExists(jsonFile) or godotBin.getLastModificationTime() > jsonFile.getLastModificationTime():
+    # pragmagic's original nakefile was broken here - it works now.
+    discard execCmd("$1 --gdnative-generate-json-api $2" % [godotBin, jsonFile])
+
+    if not fileExists(jsonFile):
+      echo "Failed to generate api.json"
+      quit -1
+
+    genApi(targetDir, jsonFile)
+    echo "Godot API generated successfully."
+  else:
+    echo "Godot API already exists."
+
+proc build() =
+  ## Builds your scripts for the current platform.
+  genGodotApi()
+  let bitsPostfix = when sizeof(int) == 8: "_64" else: "_32"
+  let libFile =
+    when defined(windows):
+      "nim" & bitsPostfix & ".dll"
+    elif defined(ios):
+      "nim_ios" & bitsPostfix & ".dylib"
+    elif defined(macosx):
+      "nim_mac.dylib"
+    elif defined(android):
+      "libnim_android.so"
+    elif defined(linux):
+      "nim_linux" & bitsPostfix & ".so"
+    else: nil
+  createDir("_dlls")
+  setCurrentDir("src")
+  quit execCmd("nimble c ../src/stub.nim -o:../_dlls/$1" % libFile)
+proc clean() =
+  ## Remove files produced by building.
+  removeDir(".nimcache")
+  removeDir("src"/".nimcache")
+  removeDir("src"/"godotapi")
+  removeDir("_dlls")
+
+proc getValidNodes(): seq[string] =
   # get the name of every godot node by walking the godotapi directory
   for f in walkDir("src/godotapi"):
     if f.path.endsWith(".nim"):
       result.add f.path.split("\\")[^1][0..^5]
-
-const nodeNames = getNodeNames().asArray
-
-proc isValidNode(node: string): bool = nodeNames.binarySearch(node) != -1
-
 proc probableObjName(node: string): string =
   # this spits out what is *probably* the object name of a given node
   for x in node.split("_"):
     result.add x.capitalizeAscii
-
-proc newscript(name: string, node: string) =
+proc newScript(name: string, node: string) =
   ## Creates a new script.
+
+  genGodotApi()
+
+  let validNodes = getValidNodes()
 
   let
     uppername = name.capitalizeAscii
     lowername = name.toLower
     lowernode = node.toLower
 
-  if not isValidNode(lowernode):
+  if validNodes.binarySearch(node) == -1:
     echo "'$1' is not a valid node type." % node
     quit -1
 
@@ -69,7 +114,7 @@ class_name = "$1"
   echo "Created new script '$1' of type '$2'." % [uppername, lowernode]
   quit 0
 
-proc delscript(name: string) =
+proc delScript(name: string) =
   ## Deletes an existing script.
 
   let
@@ -95,4 +140,10 @@ proc delscript(name: string) =
   else:
     echo "Aborted."
 
-dispatchMulti([newscript], [delscript])
+dispatchMulti(
+  [build],
+  [clean],
+  [newScript, help={"name": "The name for the new script",
+    "node": "The Godot node type for the new script"}
+  ],
+  [delScript, help={"name": "The name of the script you want to delete"}])
